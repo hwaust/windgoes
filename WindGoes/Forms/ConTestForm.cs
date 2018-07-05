@@ -29,11 +29,6 @@ namespace WindGoes.Forms
         /// </summary>
         public string FilePath { get; set; }
 
-        /// <summary>
-        /// 是否连接成功。
-        /// </summary>  
-        SQLConnection conManager = new SQLConnection();
-
         /// <summary> 
         /// 连接字符串对象。
         /// </summary>
@@ -55,7 +50,7 @@ namespace WindGoes.Forms
 
             cbConnectionType.SelectedIndex = 0;
 
-          string[] constrs=   File.ReadAllLines(FilePath, Encoding.Default);
+            string[] constrs = File.ReadAllLines(FilePath, Encoding.Default);
             foreach (string constr in constrs)
             {
                 SQLConnection sm = SQLConnection.FromDesString(constr, true);
@@ -64,11 +59,15 @@ namespace WindGoes.Forms
                     cms.Add(sm);
                     cbServer.Items.Add(sm.DataSource);
                 }
-            } 
+            }
 
             // init UI
             if (cms.Count > 0)
-                cbServer.Text = cms[0].DataSource;
+            {
+                Connection = cms[0];
+                AdjustUI();
+            }
+                
 
             AdjustUI();
         }
@@ -106,16 +105,18 @@ namespace WindGoes.Forms
             AdjustUI();
             if (result)
             {
-                MessageBox.Show("数据库连接成功。\n     >> 请选择需要连接的数据库名称 <<", "连接成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("数据库连接成功。\n请选择需要连接的数据库名称。", "连接成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 MessageBox.Show("数据库连接失败，原因如下：\n" + e.Message, "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            btnSave.Enabled = cbDatabase.SelectedIndex >= 0;
         }
 
 
-        DateTime dt; 
+        DateTime dt;
 
         // 
         private void timer1_Tick(object sender, EventArgs e)
@@ -125,8 +126,8 @@ namespace WindGoes.Forms
             string s1 = "连接测试中";
             int t = 0;
             for (int i = 0; i < t; i++)
-                s1 += "."; 
-            t = t > 3 ? 0 : t += 1; 
+                s1 += ".";
+            t = t > 3 ? 0 : t += 1;
             lblResult.Text = s1;
         }
 
@@ -146,7 +147,7 @@ namespace WindGoes.Forms
                 }
             }
         }
-         
+
 
         private void cbConnectionType_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -166,7 +167,7 @@ namespace WindGoes.Forms
 
         private void cbServer_TextChanged(object sender, EventArgs e)
         {
-            btnConnection.Enabled = cbServer.Text.Length == 0 ? false : true;
+            btnConnection.Enabled = cbServer.Text.Length > 0;
             Connected = false;
             AdjustUI();
 
@@ -222,15 +223,13 @@ namespace WindGoes.Forms
         {
             try
             {
-                string path1 = @"C:\tmp.dat";
-                using (StreamWriter sw = new StreamWriter(path1, false, Encoding.Default))
-                {
-                    sw.WriteLine("");
-                }
-                System.Diagnostics.Process.Start("NotePad.exe", path1);
+                string tempfile = Application.StartupPath + "\\tmp.txt";
+                File.WriteAllText(tempfile, Connection.ConnectionString, Encoding.Default);
+                Thread.Sleep(500);
+                System.Diagnostics.Process.Start("NotePad.exe", tempfile);
                 Application.DoEvents();
-                Thread.Sleep(1000);
-                File.Delete(path1);
+                Thread.Sleep(500); // if not wait, the file will be deleted before displayed.
+                File.Delete(tempfile);
             }
             catch (Exception e1) { Console.WriteLine(e1.Message); }
         }
@@ -275,7 +274,7 @@ namespace WindGoes.Forms
             //2.移除原来队伍中已经存在的conManager
             for (int i = 0; i < cms.Count; i++)
             {
-                if (cms[i].DataSource == conManager.DataSource)
+                if (cms[i].DataSource == Connection.DataSource)
                 {
                     cms.RemoveAt(i);
                     break;
@@ -285,7 +284,7 @@ namespace WindGoes.Forms
             //3.写文件，其中conManager先写入，方便下次读取时自动关联。
             using (StreamWriter sw = new StreamWriter(FilePath, false, Encoding.Default))
             {
-                sw.WriteLine(conManager.ToDESString(true));
+                sw.WriteLine(Connection.ToDESString(true));
                 for (int i = 0; i < cms.Count; i++)
                 {
                     sw.WriteLine(cms[i].ToDESString(true));
