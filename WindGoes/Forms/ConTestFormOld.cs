@@ -73,8 +73,8 @@ namespace WindGoes.Forms
             this.timer1.Start();
             MultiThreadSqlCon con = new MultiThreadSqlCon();
             con.Timeout = (int)this.numericUpDown1.Value;
-            con.ConnectionString = this.conManager.ConnectionString;
-            con.AfterTest += new MyEvent(this.mt_AfterTest);
+            //con.ConnectionString = this.conManager.ConnectionString;
+           // con.AfterTest += new EventHandler(mt_AfterTest);
             con.StartTest();
         }
 
@@ -110,12 +110,12 @@ namespace WindGoes.Forms
         }
 
 
-        private void mt_AfterTest(bool result, Exception e)
+        private void mt_AfterTest(object result, Exception e)
         {
             this.btnConnection.Enabled = true;
-            this.Connected = result;
+            this.Connected = (bool) result;
             this.timer1.Stop();
-            this.lblResult.Text = result ? "连接成功！" : e.Message;
+            this.lblResult.Text = Connected ? "连接成功！" : e.Message;
         }
 
         private void timer1_Tick(object sender, EventArgs e)

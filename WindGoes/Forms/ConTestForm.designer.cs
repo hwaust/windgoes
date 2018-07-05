@@ -112,6 +112,7 @@
             // 
             // cbDatabase
             // 
+            this.cbDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDatabase.FormattingEnabled = true;
             this.cbDatabase.ItemHeight = 12;
             this.cbDatabase.Location = new System.Drawing.Point(175, 126);

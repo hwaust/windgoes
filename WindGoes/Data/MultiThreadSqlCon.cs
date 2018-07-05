@@ -11,61 +11,51 @@ using System;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Windows.Forms;
+using WindGoes.Sys;
 
 namespace WindGoes.Data
 {
-    public delegate void MyEvent(bool result, Exception e);
-
     /// <summary>
     /// 基于多线程的连接测试类，不会造成窗体卡死。
     /// </summary>
     public class MultiThreadSqlCon : ObjectBase
     {
-        int timeout = 20;
         /// <summary>
-        /// 连接超时时间。
+        /// 连接超时时间，根据网络延时，会有一定误差。
         /// </summary>
-        public int Timeout
-        {
-            get { return timeout; }
-            set { timeout = value; }
-        }
-
-        /// <summary>
-        /// 需要测试的连接字符串，由于网络延时，会有0.5秒左右的误差。
-        /// </summary>
-        public string ConnectionString { get; set; }
+        public int Timeout { get; set; } = 20;
 
         bool done = false;
-        bool connected = false;
-        DateTime dt = DateTime.Now;
-        Thread t1 = null;
-        Thread t2 = null;
+
+        Thread testThread = null;
+        Thread controllerThread = null;
+
         Exception exception;
 
         /// <summary>
         /// 在连接测试结束时发生的事件，参数只有一个bool型变量，表示是否连接成功。
         /// </summary>
-        public event MyEvent AfterTest = null;
+        public event EventHandler AfterTest = null;
+
+        /// <summary>
+        /// Event to be tested.
+        /// </summary>
+        public event EventHandler Test = null;
 
         /// <summary>
         /// 数据库连接测试方法。
         /// </summary>
         private void ConTest()
         {
+            done = false;
             try
             {
-                SqlConnection sql = new SqlConnection(ConnectionString);
-                sql.Open();
-                sql.Close();
-                connected = true;
+                Test?.Invoke(null, null);
             }
-            catch (Exception e1)
+            catch (Exception e)
             {
-                connected = false;
-                exception = e1;
+                exception = e;
             }
-
             done = true;
         }
 
@@ -75,30 +65,20 @@ namespace WindGoes.Data
         /// </summary>
         private void ThreadController()
         {
+            // waiting
+            DateTime startingTime = DateTime.Now;
             while (!done)
             {
-                TimeSpan ts = DateTime.Now - dt;
-                if (ts.TotalSeconds > timeout)
-                {
-                    connected = false;
-                    done = true;
-                }
-                Thread.Sleep(10);
+                TimeSpan ts = DateTime.Now - startingTime;
+                done = ts.TotalSeconds > Timeout;
+                Thread.Sleep(1);
             }
 
-            if (AfterTest != null)
-            {
-                bool b = Control.CheckForIllegalCrossThreadCalls;
-                System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
-                exception = exception ?? new Exception("连接超时，可能是服务器地址不正确。");
-                AfterTest(connected, exception);
-                Control.CheckForIllegalCrossThreadCalls = b;
-            }
-            try
-            {
-                t1.Abort(); //线程的关闭需要时间，尤其是关闭测试数据库连接的线程。
-            }
-            catch { }
+            // invoke
+            AfterTest?.Invoke(this, new TestEventArgs(null, exception ?? new Exception("连接超时，可能是服务器地址不正确。")));
+
+            //线程的关闭需要时间，尤其是关闭测试数据库连接的线程。
+            testThread.Abort();
         }
 
         /// <summary>
@@ -106,16 +86,13 @@ namespace WindGoes.Data
         /// </summary>
         public void StartTest()
         {
-            done = false;
-            connected = false;
-            dt = DateTime.Now;
-            t1 = new Thread(new ThreadStart(ConTest));
-            t1.IsBackground = true;
-            t1.Start();
+            testThread = new Thread(new ThreadStart(ConTest));
+            testThread.IsBackground = true;
+            testThread.Start();
 
-            t2 = new Thread(new ThreadStart(ThreadController));
-            t2.IsBackground = true;
-            t2.Start();
+            controllerThread = new Thread(new ThreadStart(ThreadController));
+            controllerThread.IsBackground = true;
+            controllerThread.Start();
         }
 
         /// <summary>
@@ -125,8 +102,8 @@ namespace WindGoes.Data
         {
             try
             {
-                t1.Abort();
-                t2.Abort();
+                testThread.Abort();
+                controllerThread.Abort();
             }
             catch { }
         }

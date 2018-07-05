@@ -198,6 +198,7 @@
     <Compile Include="Sys\FPSCounter.cs" />
     <Compile Include="Sys\MemoryShare.cs" />
     <Compile Include="Sys\RegistryAccess.cs" />
+    <Compile Include="Sys\TestEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Forms\ConTestForm.resx">

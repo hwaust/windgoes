@@ -7,6 +7,7 @@ using WindGoes.Data;
 using System.Threading;
 using WindGoes.IO;
 using WindGoes.Database;
+using WindGoes.Sys;
 
 namespace WindGoes.Forms
 {
@@ -16,18 +17,22 @@ namespace WindGoes.Forms
     public partial class ConTestForm : BaseForm
     {
         /// <summary>
+        /// Used to measure the connecting time.
+        /// </summary>
+        DateTime connectionTiming;
+
+        /// <summary>
         /// 用于数据库连接测试，及数据库连接字符字符串管理。
         /// </summary>
         public ConTestForm()
         {
-            InitializeComponent();
-            FilePath = ".\\data.bin";
+            InitializeComponent(); 
         }
 
         /// <summary>
         /// 保存的文件路径。
         /// </summary>
-        public string FilePath { get; set; }
+        public string FilePath { get; set; } = ".\\data.bin";
 
         /// <summary> 
         /// 连接字符串对象。
@@ -65,34 +70,36 @@ namespace WindGoes.Forms
             if (cms.Count > 0)
             {
                 Connection = cms[0];
-                AdjustUI();
+                cbDatabase.Items.Add(Connection.DataSource);
+                cbDatabase.SelectedIndex = 0;
+                btnSave.Enabled = true;
             }
-                
 
-            AdjustUI();
+            UpdateUI();
         }
 
         private void btnConnection_Click(object sender, EventArgs e)
         {
-            AdjustUI();
+            UpdateConnection();
 
             btnConnection.Enabled = false;
-            dt = DateTime.Now;
+            connectionTiming = DateTime.Now;
             timer1.Start();
 
 
+            DBManager.ConnectionString = Connection.ConnectionString; 
             MultiThreadSqlCon mt = new MultiThreadSqlCon();
-            DBManager.ConnectionString = Connection.ConnectionString;
-            mt.ConnectionString = Connection.ConnectionString;
             mt.Timeout = (int)numTimeoutInSecond.Value;
-            mt.AfterTest += new MyEvent(mt_AfterTest);
+           
+            mt.AfterTest += new EventHandler(mt_AfterTest);
             mt.StartTest();
         }
 
-        void mt_AfterTest(bool result, Exception e)
+        void mt_AfterTest(object sender, EventArgs e)
         {
+            TestEventArgs targs = e as TestEventArgs;
             btnConnection.Enabled = true;
-            Connected = result;
+            Connected = true;
             if (Connected)
             {
                 cbDatabase.Enabled = true;
@@ -102,26 +109,25 @@ namespace WindGoes.Forms
                 cbDatabase.Items.AddRange(dm.GetAllDatabaseNames());
             }
             timer1.Stop();
-            AdjustUI();
-            if (result)
+
+            UpdateConnection();
+            if (Connected)
             {
                 MessageBox.Show("数据库连接成功。\n请选择需要连接的数据库名称。", "连接成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("数据库连接失败，原因如下：\n" + e.Message, "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            btnSave.Enabled = cbDatabase.SelectedIndex >= 0;
+                MessageBox.Show("数据库连接失败，原因如下：\n" + targs.Exception.Message, "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } 
         }
 
 
-        DateTime dt;
+
 
         // 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            TimeSpan ts = DateTime.Now - dt;
+            TimeSpan ts = DateTime.Now - connectionTiming;
             lblTotalTime.Text = ts.TotalSeconds.ToString("总时间：0.0s");
             string s1 = "连接测试中";
             int t = 0;
@@ -151,10 +157,10 @@ namespace WindGoes.Forms
 
         private void cbConnectionType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            AdjustUI();
+            UpdateConnection();
         }
 
-        private void AdjustUI()
+        private void UpdateConnection()
         {
             txtUserName.Enabled = cbConnectionType.SelectedIndex == 1;
             txtPassword.Enabled = cbConnectionType.SelectedIndex == 1;
@@ -169,27 +175,27 @@ namespace WindGoes.Forms
         {
             btnConnection.Enabled = cbServer.Text.Length > 0;
             Connected = false;
-            AdjustUI();
+            UpdateConnection();
 
             for (int i = 0; i < cms.Count; i++)
             {
                 if (cms[i].DataSource.ToLower().Trim() == cbServer.Text.ToLower().Trim())
                 {
                     Connection = cms[i];
-                    AttachUI(Connection);
+                    UpdateUI();
                     return;
                 }
             }
 
             Connection = null;
-            AttachUI(Connection);
+            UpdateUI();
 
         }
 
 
-        private void AttachUI(SQLConnection cm)
+        private void UpdateUI()
         {
-            if (cm == null)
+            if (Connection == null)
             {
                 txtUserName.Clear();
                 txtPassword.Clear();
@@ -197,26 +203,26 @@ namespace WindGoes.Forms
             }
             else
             {
-                cbConnectionType.SelectedIndex = cm.TrustedConnection ? 0 : 1;
-                if (!cm.TrustedConnection)
+                cbConnectionType.SelectedIndex = Connection.TrustedConnection ? 0 : 1;
+                if (!Connection.TrustedConnection)
                 {
-                    txtUserName.Text = cm.UserID;
-                    txtPassword.Text = cm.Password;
+                    txtUserName.Text = Connection.UserID;
+                    txtPassword.Text = Connection.Password;
                 }
-                cbDatabase.Text = cm.InitialCatalog;
+                cbDatabase.Text = Connection.InitialCatalog;
             }
         }
 
         private void txtUserName_TextChanged(object sender, EventArgs e)
         {
             Connected = false;
-            AdjustUI();
+            UpdateConnection();
         }
 
         private void txtPassword_TextChanged(object sender, EventArgs e)
         {
             Connected = false;
-            AdjustUI();
+            UpdateConnection();
         }
 
         private void btGetConnectionString_Click(object sender, EventArgs e)
@@ -225,7 +231,6 @@ namespace WindGoes.Forms
             {
                 string tempfile = Application.StartupPath + "\\tmp.txt";
                 File.WriteAllText(tempfile, Connection.ConnectionString, Encoding.Default);
-                Thread.Sleep(500);
                 System.Diagnostics.Process.Start("NotePad.exe", tempfile);
                 Application.DoEvents();
                 Thread.Sleep(500); // if not wait, the file will be deleted before displayed.
@@ -236,7 +241,7 @@ namespace WindGoes.Forms
 
         private void cbDatabase_SelectedIndexChanged(object sender, EventArgs e)
         {
-            AdjustUI();
+            UpdateConnection();
             if (cbDatabase.SelectedIndex >= 0)
             {
                 btnSave.Enabled = true;
