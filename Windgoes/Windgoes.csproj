@@ -1,20 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F13FA50C-0127-4CF6-872E-A640070559ED}</ProjectGuid>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DA789AD7-FA0E-4600-A973-BBBB3B669053}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Windgoes</RootNamespace>
-    <AssemblyName>Windgoes</AssemblyName>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WindGoes</RootNamespace>
+    <AssemblyName>WindGoes</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
+    <SignAssembly>false</SignAssembly>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,57 +28,245 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\WindGoes.xml</DocumentationFile>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
+    <DocumentationFile>bin\Release\WindGoes.xml</DocumentationFile>
+    <RegisterForComInterop>true</RegisterForComInterop>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Database\DalMaker.Class.cs" />
+    <Compile Include="Database\DalMaker.cs" />
+    <Compile Include="Database\DalMaker.Form.cs" />
+    <Compile Include="Database\DalMaker.FormDesign.cs" />
+    <Compile Include="Database\Data.cs" />
+    <Compile Include="Database\DBManager.cs" />
+    <Compile Include="Database\DBType.cs" />
+    <Compile Include="Database\FieldInfo.cs" />
+    <Compile Include="Data\AppSession.cs" />
+    <Compile Include="Data\ChineseSpell.cs" />
+    <Compile Include="Data\FormDataSaver.cs" />
+    <Compile Include="Data\FrequentRegex.cs" />
+    <Compile Include="Data\IPropertyManager.cs" />
+    <Compile Include="Data\Serializer.cs" />
+    <Compile Include="Data\ValueKeeper.cs" />
+    <Compile Include="DateHelper.cs" />
+    <Compile Include="FileHelper.cs" />
+    <Compile Include="Forms\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BaseForm.Designer.cs">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Data\DataImportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Data\DataImportForm.Designer.cs">
+      <DependentUpon>DataImportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DropListControl.cs" />
+    <Compile Include="Forms\DataSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DataSearchForm.designer.cs">
+      <DependentUpon>DataSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\InputBoxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputBoxForm.Designer.cs">
+      <DependentUpon>InputBoxForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MultiDataSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MultiDataSearchForm.designer.cs">
+      <DependentUpon>MultiDataSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlHelper.cs" />
+    <Compile Include="Forms\ScreenCapture\CaptureImageToolColorTable.cs" />
+    <Compile Include="Forms\ScreenCapture\ColorLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\ColorSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\ColorSelector.designer.cs">
+      <DependentUpon>ColorSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\ControlPaintEx.cs" />
+    <Compile Include="Forms\ScreenCapture\DrawStyle.cs" />
+    <Compile Include="Forms\ScreenCapture\DrawTextData.cs" />
+    <Compile Include="Forms\ScreenCapture\DrawToolsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\DrawToolsControl.designer.cs">
+      <DependentUpon>DrawToolsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\DrawToolsDockStyle.cs" />
+    <Compile Include="Forms\ScreenCapture\GraphicsPathHelper.cs" />
+    <Compile Include="Forms\ScreenCapture\NativeMethods.cs" />
+    <Compile Include="Forms\ScreenCapture\OperateManager.cs" />
+    <Compile Include="Forms\ScreenCapture\OperateObject.cs" />
+    <Compile Include="Forms\ScreenCapture\OperateType.cs" />
+    <Compile Include="Forms\ScreenCapture\RegionHelper.cs" />
+    <Compile Include="Forms\ScreenCapture\RoundStyle.cs" />
+    <Compile Include="Forms\ScreenCapture\ScreenCaptureForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\ScreenCaptureForm.designer.cs">
+      <DependentUpon>ScreenCaptureForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ScreenCapture\SizeGrip.cs" />
+    <Compile Include="Forms\ScreenCapture\ToolStripRendererEx.cs" />
+    <Compile Include="Info\CodeInfo.cs" />
+    <Compile Include="Data\DataBase.cs" />
+    <Compile Include="Data\ErrorManager.cs" />
+    <Compile Include="Forms\ControlDrager.cs" />
+    <Compile Include="Data\MDFive.cs" />
+    <Compile Include="Data\MultiThreadSqlCon.cs" />
+    <Compile Include="Data\Session.cs" />
+    <Compile Include="Forms\ConTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ConTestForm.designer.cs">
+      <DependentUpon>ConTestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ConTestFormOld.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ConTestFormOld.Designer.cs">
+      <DependentUpon>ConTestFormOld.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\NetSendForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NetSendForm.Designer.cs">
+      <DependentUpon>NetSendForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\VanishingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\VanishingForm.designer.cs">
+      <DependentUpon>VanishingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Info\InnerData.cs" />
+    <Compile Include="Info\IDCard.cs" />
+    <Compile Include="IOHelper.cs" />
+    <Compile Include="IO\FileHelper.cs" />
+    <Compile Include="IO\FileInfoSaver.cs" />
+    <Compile Include="IO\IniAccess.cs" />
+    <Compile Include="Data\DESCrypto.cs" />
+    <Compile Include="Data\SQLConnection.cs" />
+    <Compile Include="Data\LunaMonth.cs" />
+    <Compile Include="Net\DataDownloadEvenetArg.cs" />
+    <Compile Include="Net\FileDownloader.cs" />
+    <Compile Include="Net\DataSender.cs" />
+    <Compile Include="Net\NetData.cs" />
+    <Compile Include="Net\NetOrder.cs" />
+    <Compile Include="Net\NetOrderDealer.cs" />
+    <Compile Include="Net\NetServer.cs" />
+    <Compile Include="ObjectBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Data\PropertyIOManager.cs" />
+    <Compile Include="Functions.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RandomHelper.cs" />
+    <Compile Include="Security\RSACryption.cs" />
+    <Compile Include="StringHelper.cs" />
+    <Compile Include="Sys\ClassViewer.cs" />
+    <Compile Include="Sys\CmdExecute.cs" />
+    <Compile Include="Sys\FPSCounter.cs" />
+    <Compile Include="Sys\MemoryShare.cs" />
+    <Compile Include="Sys\RegistryAccess.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\ConTestForm.resx">
+      <DependentUpon>ConTestForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ConTestFormOld.resx">
+      <DependentUpon>ConTestFormOld.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DataSearchForm.resx">
+      <DependentUpon>DataSearchForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Data\DataImportForm.resx">
+      <DependentUpon>DataImportForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputBoxForm.resx">
+      <DependentUpon>InputBoxForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MultiDataSearchForm.resx">
+      <DependentUpon>MultiDataSearchForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\NetSendForm.resx">
+      <DependentUpon>NetSendForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScreenCapture\ColorSelector.resx">
+      <DependentUpon>ColorSelector.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScreenCapture\DrawToolsControl.resx">
+      <DependentUpon>DrawToolsControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ScreenCapture\ScreenCaptureForm.resx">
+      <DependentUpon>ScreenCaptureForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\VanishingForm.resx">
+      <DependentUpon>VanishingForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Content Include="Log.txt" />
+    <None Include="Resources\Text.ico" />
+    <None Include="Resources\Save.ico" />
+    <None Include="Resources\Rectangular.ico" />
+    <None Include="Resources\Line.ico" />
+    <None Include="Resources\Exit.ico" />
+    <None Include="Resources\Ellipse.ico" />
+    <None Include="Resources\Arrow.ico" />
+    <None Include="Resources\Accept.ico" />
+    <None Include="Resources\Redo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
