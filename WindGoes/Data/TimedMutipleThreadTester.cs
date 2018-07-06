@@ -1,16 +1,14 @@
 ﻿/*
- * 名称：基于多线程的，数据库连接测试类。
- * 简介：以住的数据库连接中，单线程会造成窗体卡死，现在做成多线程。
- *			 使用的时候先建立类，传送连接字符串，然后添加事件AfterTest的方法，最后Test即可。
- * 
- * 2011-6-17	建立类
+ * 名称：可以在指定的时间内对某算法进行测试，如果超时则停止。
+ * 简介：本类中有两个事件：Test 事件即测试事件，AfterTest即测试后执行的事件。
+ *  
+ * 2011-06-17       建立类
+ * 2018-07-06       大幅修改此类，将测试方法由写死改为方法， 同时对事件参数(TestEventArgs) 进行扩展。
  * 
 */
 
 using System;
-using System.Data.SqlClient;
 using System.Threading;
-using System.Windows.Forms;
 using WindGoes.Sys;
 
 namespace WindGoes.Data
@@ -18,19 +16,31 @@ namespace WindGoes.Data
     /// <summary>
     /// 基于多线程的连接测试类，不会造成窗体卡死。
     /// </summary>
-    public class MultiThreadSqlCon : ObjectBase
+    public class TimedMutipleThreadTester : ObjectBase
     {
         /// <summary>
-        /// 连接超时时间，根据网络延时，会有一定误差。
+        /// 超过此时间后，测试事件将停止，默认值为20秒。
         /// </summary>
         public int Timeout { get; set; } = 20;
-
-        bool done = false;
-
+         
+        bool isRunning = false;
         Thread testThread = null;
         Thread controllerThread = null;
+        Exception exception; 
 
-        Exception exception;
+        /// <summary>
+        /// Initialize with default timeout 20 second.
+        /// </summary>
+        public TimedMutipleThreadTester() { }
+
+        /// <summary>
+        /// Initialize with timeout (in second)
+        /// </summary>
+        /// <param name="timeout">Timeout</param>
+        public TimedMutipleThreadTester(int timeout)
+        {
+            Timeout = timeout;
+        }
 
         /// <summary>
         /// 在连接测试结束时发生的事件，参数只有一个bool型变量，表示是否连接成功。
@@ -45,9 +55,9 @@ namespace WindGoes.Data
         /// <summary>
         /// 数据库连接测试方法。
         /// </summary>
-        private void ConTest()
+        private void test()
         {
-            done = false;
+            isRunning = true;
             try
             {
                 Test?.Invoke(null, null);
@@ -56,49 +66,47 @@ namespace WindGoes.Data
             {
                 exception = e;
             }
-            done = true;
+            isRunning = false;
         }
-
 
         /// <summary>
         /// 连接测试时的时间控件方法，超时就会自动退出。
         /// </summary>
-        private void ThreadController()
+        private void threadController()
         {
-            // waiting
             DateTime startingTime = DateTime.Now;
-            while (!done)
+            while (isRunning)
             {
-                TimeSpan ts = DateTime.Now - startingTime;
-                done = ts.TotalSeconds > Timeout;
+                isRunning = (DateTime.Now - startingTime).TotalSeconds < Timeout;
                 Thread.Sleep(1);
             }
 
-            // invoke
-            AfterTest?.Invoke(this, new TestEventArgs(null, exception ?? new Exception("连接超时，可能是服务器地址不正确。")));
+            // about test thread if still running.
+            if (isRunning)
+                testThread.Abort();
 
-            //线程的关闭需要时间，尤其是关闭测试数据库连接的线程。
-            testThread.Abort();
+            // invoke AfterTest
+            AfterTest?.Invoke(this, new TestEventArgs(true, exception));
         }
 
         /// <summary>
-        /// 开始测试。
+        /// 开始运行测试。
         /// </summary>
         public void StartTest()
         {
-            testThread = new Thread(new ThreadStart(ConTest));
+            testThread = new Thread(new ThreadStart(test));
             testThread.IsBackground = true;
             testThread.Start();
 
-            controllerThread = new Thread(new ThreadStart(ThreadController));
+            controllerThread = new Thread(new ThreadStart(threadController));
             controllerThread.IsBackground = true;
             controllerThread.Start();
         }
 
         /// <summary>
-        /// 强制停止测试。
+        /// 停止测试。
         /// </summary>
-        public void ForceStop()
+        public void Stop()
         {
             try
             {
@@ -106,8 +114,6 @@ namespace WindGoes.Data
                 controllerThread.Abort();
             }
             catch { }
-        }
-
-
+        } 
     }
 }

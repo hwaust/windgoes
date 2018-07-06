@@ -71,7 +71,7 @@ namespace WindGoes.Forms
             this.btnConnection.Enabled = false;
             this.dt = DateTime.Now;
             this.timer1.Start();
-            MultiThreadSqlCon con = new MultiThreadSqlCon();
+            TimedMutipleThreadTester con = new TimedMutipleThreadTester();
             con.Timeout = (int)this.numericUpDown1.Value;
             //con.ConnectionString = this.conManager.ConnectionString;
            // con.AfterTest += new EventHandler(mt_AfterTest);

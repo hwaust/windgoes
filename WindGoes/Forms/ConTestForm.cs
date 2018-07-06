@@ -26,7 +26,7 @@ namespace WindGoes.Forms
         /// </summary>
         public ConTestForm()
         {
-            InitializeComponent(); 
+            InitializeComponent();
         }
 
         /// <summary>
@@ -51,6 +51,7 @@ namespace WindGoes.Forms
 
         private void ConTestForm_Load(object sender, EventArgs e)
         {
+            Control.CheckForIllegalCrossThreadCalls = false;
             IniAccess.CreateFile(FilePath);
 
             cbConnectionType.SelectedIndex = 0;
@@ -63,14 +64,17 @@ namespace WindGoes.Forms
                 {
                     cms.Add(sm);
                     cbServer.Items.Add(sm.DataSource);
+
                 }
             }
+
+ 
 
             // init UI
             if (cms.Count > 0)
             {
-                Connection = cms[0];
-                cbDatabase.Items.Add(Connection.DataSource);
+                Connection = cms[0]; 
+                cbDatabase.Items.Add(Connection.InitialCatalog);
                 cbDatabase.SelectedIndex = 0;
                 btnSave.Enabled = true;
             }
@@ -87,26 +91,31 @@ namespace WindGoes.Forms
             timer1.Start();
 
 
-            DBManager.ConnectionString = Connection.ConnectionString; 
-            MultiThreadSqlCon mt = new MultiThreadSqlCon();
-            mt.Timeout = (int)numTimeoutInSecond.Value;
-           
-            mt.AfterTest += new EventHandler(mt_AfterTest);
+            DBManager.ConnectionString = Connection.ConnectionString;
+            MultiThreadSqlCon mt = new MultiThreadSqlCon((int)numTimeoutInSecond.Value);
+            mt.Test += Mt_Test;
+            mt.AfterTest += mt_AfterTest;
             mt.StartTest();
+        }
+
+
+        private void Mt_Test(object sender, EventArgs e)
+        {
+            DBManager dm = new DBManager();
+            dm.CurrentConnection = Connection.ConnectionString;
+            dm.OpenCn();
+            dm.CloseCn();
+            Connected = true;
         }
 
         void mt_AfterTest(object sender, EventArgs e)
         {
-            TestEventArgs targs = e as TestEventArgs;
             btnConnection.Enabled = true;
-            Connected = true;
             if (Connected)
             {
                 cbDatabase.Enabled = true;
-                DBManager dm = new DBManager();
-
                 cbDatabase.Items.Clear();
-                cbDatabase.Items.AddRange(dm.GetAllDatabaseNames());
+                cbDatabase.Items.AddRange(new DBManager().GetAllDatabaseNames());
             }
             timer1.Stop();
 
@@ -117,8 +126,9 @@ namespace WindGoes.Forms
             }
             else
             {
-                MessageBox.Show("数据库连接失败，原因如下：\n" + targs.Exception.Message, "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } 
+                TestEventArgs args = e as TestEventArgs;
+                MessageBox.Show("数据库连接失败，原因如下：\n" + args.Exception?.Message, "连接失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
 
@@ -152,6 +162,8 @@ namespace WindGoes.Forms
                     e.Cancel = true;
                 }
             }
+
+            Control.CheckForIllegalCrossThreadCalls = true;
         }
 
 
